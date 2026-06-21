@@ -2,6 +2,7 @@ export { initDb, getDb, closeDb } from './db.js';
 export { UserRepository } from './repositories/users.js';
 export {
   AdminUsersRepository,
+  buildUuidAliasMap,
   type AdminUserListItem,
   type AdminUserDetail,
 } from './repositories/admin-users.js';

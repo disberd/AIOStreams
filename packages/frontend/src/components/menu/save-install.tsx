@@ -333,6 +333,7 @@ function SavePreferencesModal({
 
 interface SaveConfigCardProps {
   uuid: string;
+  alias?: string | null;
   onCopyUuid: () => void;
   onSave: (e: React.FormEvent<HTMLFormElement>) => void;
   saveLoading: boolean;
@@ -341,6 +342,7 @@ interface SaveConfigCardProps {
 
 function SaveConfigCard({
   uuid,
+  alias,
   onCopyUuid,
   onSave,
   saveLoading,
@@ -360,6 +362,9 @@ function SaveConfigCard({
               <div className="flex items-center gap-2">
                 <span className="text-md text-[--primary]">
                   Your UUID: <span className="font-bold">{uuid}</span>
+                  {alias && (
+                    <span className="ml-2 text-[--muted]">· {alias}</span>
+                  )}
                 </span>
                 <BiCopy
                   className="min-h-5 min-w-5 cursor-pointer"
@@ -1439,6 +1444,8 @@ function Content() {
     setPassword,
     encryptedPassword,
     setEncryptedPassword,
+    alias,
+    setAlias,
   } = useUserData();
   const { data: linkedAccounts } = useQuery(
     linkedAccountsQuery(uuid ? { uuid, password } : null)
@@ -1768,6 +1775,7 @@ function Content() {
       setUuid(null);
       setEncryptedPassword(null);
       setPassword(null);
+      setAlias(null);
       setUserData(null);
       setSelectedMenu(firstMenu);
       deleteUserModal.close();
@@ -1866,6 +1874,7 @@ function Content() {
           <>
             <SaveConfigCard
               uuid={uuid}
+              alias={alias}
               onCopyUuid={() =>
                 copyToClipboard(uuid, {
                   onSuccess: () => toast.success('UUID copied to clipboard'),

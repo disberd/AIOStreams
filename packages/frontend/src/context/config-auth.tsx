@@ -62,6 +62,7 @@ export function ConfigAuthProvider({
     setPassword,
     setEncryptedPassword,
     setBaseline,
+    setAlias,
   } = useUserData();
   const { status } = useStatus();
   const [signInOpen, setSignInOpen] = React.useState(false);
@@ -84,12 +85,13 @@ export function ConfigAuthProvider({
       setUuid(null);
       setPassword(null);
       setEncryptedPassword(null);
+      setAlias(null);
       const revoke = everywhere ? endAllConfigSessions() : endConfigSession();
       void revoke.catch(() => {
         /* the local state is already cleared; the row expires on its own */
       });
     },
-    [uuid, setUserData, setUuid, setPassword, setEncryptedPassword]
+    [uuid, setUserData, setUuid, setPassword, setEncryptedPassword, setAlias]
   );
 
   const confirmSignOut = useConfirmationDialog({
@@ -122,6 +124,7 @@ export function ConfigAuthProvider({
         setBaseline(result.userData);
         setUuid(result.userData.uuid ?? null);
         setEncryptedPassword(result.encryptedPassword);
+        setAlias(result.alias ?? null);
       })
       .catch(() => {})
       .finally(() => {
@@ -130,7 +133,14 @@ export function ConfigAuthProvider({
     return () => {
       cancelled = true;
     };
-  }, [restoring, setUserData, setBaseline, setUuid, setEncryptedPassword]);
+  }, [
+    restoring,
+    setUserData,
+    setBaseline,
+    setUuid,
+    setEncryptedPassword,
+    setAlias,
+  ]);
 
   // confirmSignOut's identity changes every render, so read it through a ref
   // to keep the context value stable.
