@@ -46,7 +46,7 @@ export const useUsersAnalytics = (range: Range) =>
     queryFn: () =>
       api<{
         growth: GrowthPoint[];
-        topUsers: { uuidHash: string; requests: number }[];
+        topUsers: { uuidHash: string; requests: number; alias?: string }[];
       }>(`/dashboard/analytics/users?range=${range}`),
     staleTime: 30_000,
   });
