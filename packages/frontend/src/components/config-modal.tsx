@@ -41,6 +41,7 @@ export function ConfigModal({
     setPassword,
     setEncryptedPassword,
     setBaseline,
+    setAlias,
   } = useUserData();
   const { user: sessionUser } = useSession();
   const { status } = useStatus();
@@ -77,6 +78,7 @@ export function ConfigModal({
       setUuid(loadUuid);
       setPassword(loadPassword);
       setEncryptedPassword(result.encryptedPassword);
+      setAlias(result.alias ?? null);
 
       if (sessionsEnabled) {
         // The configuration is already open, so this failing is not a failed sign in.
@@ -95,6 +97,7 @@ export function ConfigModal({
       setUuid,
       setPassword,
       setEncryptedPassword,
+      setAlias,
       onSuccess,
     ]
   );

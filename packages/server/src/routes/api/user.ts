@@ -2,6 +2,7 @@ import { Router, type Request } from 'express';
 import {
   APIError,
   AnalyticsRepository,
+  buildUuidAliasMap,
   config as appConfig,
   ConfigSessionRepository,
   constants,
@@ -169,6 +170,7 @@ router.get('/', async (req, res, next) => {
       data: {
         userData: userData,
         encryptedPassword: encryptedPassword,
+        alias: buildUuidAliasMap().get(uuid) ?? null,
       },
     })
   );

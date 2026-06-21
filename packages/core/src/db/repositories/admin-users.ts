@@ -22,7 +22,7 @@ export interface AdminUserListItem {
  * Reverse of `aliasedConfigurations` (alias → {uuid,password}): builds a
  * uuid → alias lookup. A uuid with several aliases gets them comma-joined.
  */
-function buildUuidAliasMap(): Map<string, string> {
+export function buildUuidAliasMap(): Map<string, string> {
   const map = new Map<string, string>();
   for (const [alias, entry] of Object.entries(
     appConfig.api.aliasedConfigurations

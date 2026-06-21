@@ -635,6 +635,8 @@ interface UserDataContextType {
   discardDraft: () => void;
   /** Discards the draft and stops keeping drafts on this browser. */
   disableDrafts: () => void;
+  alias: string | null;
+  setAlias: (alias: string | null) => void;
 }
 
 const UserDataContext = React.createContext<UserDataContextType | undefined>(
@@ -672,6 +674,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
   const [encryptedPassword, setEncryptedPassword] = React.useState<
     string | null
   >(null);
+  const [alias, setAlias] = React.useState<string | null>(null);
 
   // Last configuration known to be saved; a draft exists only while it differs.
   const baselineRef = React.useRef<UserData>(DefaultUserData);
@@ -800,6 +803,8 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       restoreDraft,
       discardDraft,
       disableDrafts,
+      alias,
+      setAlias,
     }),
     [
       userData,
@@ -812,6 +817,7 @@ export function UserDataProvider({ children }: { children: React.ReactNode }) {
       restoreDraft,
       discardDraft,
       disableDrafts,
+      alias,
     ]
   );
 

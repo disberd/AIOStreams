@@ -211,6 +211,7 @@ import type {
 interface LoadUserResponse {
   userData: UserData;
   encryptedPassword: string;
+  alias?: string | null;
 }
 
 interface CreateUserResponse {
