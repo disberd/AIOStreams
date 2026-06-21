@@ -26,6 +26,7 @@ interface UserItem {
   updatedAt: string;
   accessedAt: string;
   requests24h: number;
+  alias?: string;
 }
 interface UserList {
   items: UserItem[];
@@ -242,6 +243,7 @@ export function UsersPage() {
                       />
                     </th>
                     <th className="p-3">UUID</th>
+                    <th className="p-3">Alias</th>
                     {(
                       [
                         ['created_at', 'Created'],
@@ -286,6 +288,13 @@ export function UsersPage() {
                       >
                         {u.uuid.slice(0, 8)}…{u.uuid.slice(-4)}
                       </td>
+                      <td className="p-3">
+                        {u.alias ? (
+                          u.alias
+                        ) : (
+                          <span className="text-[--muted]">—</span>
+                        )}
+                      </td>
                       <td className="p-3">{formatDateTime(u.createdAt)}</td>
                       <td className="p-3">{formatDateTime(u.accessedAt)}</td>
                       <td className="p-3 text-right tabular-nums">
@@ -317,7 +326,7 @@ export function UsersPage() {
                   {d && pageItems.length === 0 && (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="p-8 text-center text-[--muted]"
                       >
                         No users found.
@@ -405,6 +414,12 @@ export function UsersPage() {
               <div className="text-xs text-[--muted]">UUID</div>
               <div className="font-mono break-all">{detail.uuid}</div>
             </div>
+            {detail.alias && (
+              <div>
+                <div className="text-xs text-[--muted]">Alias</div>
+                <div>{detail.alias}</div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="text-xs text-[--muted]">Created</div>
