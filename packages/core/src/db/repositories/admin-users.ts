@@ -6,6 +6,7 @@
 import { getDb } from '../db.js';
 import { sql, raw, join } from '../sql.js';
 import { hmac } from '../../analytics/index.js';
+import { config as appConfig } from '../../config/index.js';
 
 export interface AdminUserListItem {
   uuid: string;
@@ -13,6 +14,24 @@ export interface AdminUserListItem {
   updatedAt: string;
   accessedAt: string;
   requests24h: number;
+  /** Friendly label(s) from `aliasedConfigurations` pointing at this uuid. */
+  alias?: string;
+}
+
+/**
+ * Reverse of `aliasedConfigurations` (alias → {uuid,password}): builds a
+ * uuid → alias lookup. A uuid with several aliases gets them comma-joined.
+ */
+function buildUuidAliasMap(): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const [alias, entry] of Object.entries(
+    appConfig.api.aliasedConfigurations
+  )) {
+    if (!entry?.uuid) continue;
+    const existing = map.get(entry.uuid);
+    map.set(entry.uuid, existing ? `${existing}, ${alias}` : alias);
+  }
+  return map;
 }
 
 export interface AdminUserDetail extends AdminUserListItem {
@@ -63,6 +82,7 @@ export const AdminUsersRepository = {
     );
 
     const cutoff = Date.now() - 86_400_000;
+    const aliasMap = buildUuidAliasMap();
     const items: AdminUserListItem[] = [];
     for (const r of rows) {
       const c = await db.query<{ c: number | string }>(
@@ -75,6 +95,7 @@ export const AdminUsersRepository = {
         updatedAt: toUtcString(r.updated_at),
         accessedAt: toUtcString(r.accessed_at),
         requests24h: Number(c[0]?.c ?? 0),
+        alias: aliasMap.get(r.uuid),
       });
     }
     return { items, total, page, limit, pages: Math.ceil(total / limit) };
@@ -108,6 +129,7 @@ export const AdminUsersRepository = {
       updatedAt: toUtcString(r.updated_at),
       accessedAt: toUtcString(r.accessed_at),
       requests24h: Number(c[0]?.c ?? 0),
+      alias: buildUuidAliasMap().get(uuid),
       recentErrorStages: errs.map((e) => ({
         stage: e.error_stage,
         count: Number(e.c),
