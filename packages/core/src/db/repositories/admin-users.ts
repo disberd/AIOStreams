@@ -34,6 +34,20 @@ function buildUuidAliasMap(): Map<string, string> {
   return map;
 }
 
+/** Same as buildUuidAliasMap but keyed by hmac(uuid) for analytics lookups. */
+export function buildUuidHashAliasMap(): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const [alias, entry] of Object.entries(
+    appConfig.api.aliasedConfigurations
+  )) {
+    if (!entry?.uuid) continue;
+    const key = hmac(entry.uuid);
+    const existing = map.get(key);
+    map.set(key, existing ? `${existing}, ${alias}` : alias);
+  }
+  return map;
+}
+
 export interface AdminUserDetail extends AdminUserListItem {
   recentErrorStages: Array<{ stage: string; count: number }>;
 }

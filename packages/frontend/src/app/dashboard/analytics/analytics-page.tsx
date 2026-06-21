@@ -427,7 +427,7 @@ export function AnalyticsPage() {
       {/* Top users */}
       <Card className="p-4">
         <h3 className="mb-3 text-sm font-semibold">
-          Most active users (hashed)
+          Most active users
         </h3>
         <DashboardQueryBoundary
           query={users}
@@ -446,7 +446,7 @@ export function AnalyticsPage() {
                         className="border-b border-[--border]/50"
                       >
                         <td className="py-1.5 font-mono text-xs text-[--muted] break-all">
-                          {u.uuidHash.slice(0, 16)}
+                          {u.alias ?? u.uuidHash.slice(0, 16)}
                         </td>
                         <td className="py-1.5 pl-3 text-right whitespace-nowrap">
                           <span className="inline-flex items-center gap-1.5">

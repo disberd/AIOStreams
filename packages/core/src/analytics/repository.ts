@@ -8,6 +8,7 @@ import { sql, raw as sqlRaw } from '../db/sql.js';
 import { config } from '../config/index.js';
 import { createLogger } from '../logging/logger.js';
 import type { AnalyticsServiceBreakdown } from './index.js';
+import { buildUuidHashAliasMap } from '../db/repositories/admin-users.js';
 
 export type AnalyticsRange = '24h' | '7d' | '30d' | 'all';
 
@@ -218,7 +219,12 @@ export const AnalyticsRepository = {
           WHERE ts >= ${since} AND uuid_hash IS NOT NULL
           GROUP BY uuid_hash ORDER BY c DESC LIMIT 20`
     );
-    return rows.map((r) => ({ uuidHash: r.uuid_hash, requests: n(r.c) }));
+    const aliasMap = buildUuidHashAliasMap();
+    return rows.map((r) => ({
+      uuidHash: r.uuid_hash,
+      requests: n(r.c),
+      alias: aliasMap.get(r.uuid_hash),
+    }));
   },
 
   /**
