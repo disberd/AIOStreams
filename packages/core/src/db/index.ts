@@ -2,7 +2,6 @@ export { initDb, getDb, closeDb } from './db.js';
 export { UserRepository } from './repositories/users.js';
 export {
   AdminUsersRepository,
-  buildUuidAliasMap,
   type AdminUserListItem,
   type AdminUserDetail,
 } from './repositories/admin-users.js';
@@ -64,6 +63,7 @@ export {
 export {
   ConfigProfileRepository,
   resolveConfigAlias,
+  uuidAliasMap,
   MAX_PROFILES_PER_OWNER,
   type ConfigProfile,
   type ConfigAliasTarget,

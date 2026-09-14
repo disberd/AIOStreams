@@ -283,3 +283,38 @@ export async function resolveConfigAlias(
     return null;
   }
 }
+
+/**
+ * The reverse of alias resolution: uuid → the name(s) to display for it.
+ *
+ * Both alias sources feed this, so a configuration named from settings and one
+ * named from its saved profile look the same in the dashboard. Settings names
+ * lead, matching {@link resolveConfigAlias}; a uuid with several names gets
+ * them comma-joined. Never throws — a database failure degrades to the
+ * settings-only answer.
+ */
+export async function uuidAliasMap(): Promise<Map<string, string>> {
+  const byUuid = new Map<string, string[]>();
+  const add = (uuid: string, alias: string) => {
+    const names = byUuid.get(uuid);
+    if (names) names.push(alias);
+    else byUuid.set(uuid, [alias]);
+  };
+
+  for (const [alias, entry] of Object.entries(
+    appConfig.api.aliasedConfigurations
+  )) {
+    if (entry?.uuid) add(entry.uuid, alias);
+  }
+  try {
+    for (const [alias, target] of await ConfigProfileRepository.aliasMap()) {
+      add(target.uuid, alias);
+    }
+  } catch {
+    // settings-only answer
+  }
+
+  return new Map(
+    [...byUuid].map(([uuid, names]) => [uuid, names.join(', ')] as const)
+  );
+}

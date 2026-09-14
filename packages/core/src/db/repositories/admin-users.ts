@@ -6,7 +6,7 @@
 import { getDb } from '../db.js';
 import { sql, raw, join } from '../sql.js';
 import { hmac } from '../../analytics/index.js';
-import { config as appConfig } from '../../config/index.js';
+import { uuidAliasMap } from './config-profiles.js';
 
 export interface AdminUserListItem {
   uuid: string;
@@ -14,38 +14,16 @@ export interface AdminUserListItem {
   updatedAt: string;
   accessedAt: string;
   requests24h: number;
-  /** Friendly label(s) from `aliasedConfigurations` pointing at this uuid. */
+  /** Friendly name(s) for this uuid: see {@link uuidAliasMap}. */
   alias?: string;
 }
 
-/**
- * Reverse of `aliasedConfigurations` (alias → {uuid,password}): builds a
- * uuid → alias lookup. A uuid with several aliases gets them comma-joined.
- */
-export function buildUuidAliasMap(): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const [alias, entry] of Object.entries(
-    appConfig.api.aliasedConfigurations
-  )) {
-    if (!entry?.uuid) continue;
-    const existing = map.get(entry.uuid);
-    map.set(entry.uuid, existing ? `${existing}, ${alias}` : alias);
-  }
-  return map;
-}
-
-/** Same as buildUuidAliasMap but keyed by hmac(uuid) for analytics lookups. */
-export function buildUuidHashAliasMap(): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const [alias, entry] of Object.entries(
-    appConfig.api.aliasedConfigurations
-  )) {
-    if (!entry?.uuid) continue;
-    const key = hmac(entry.uuid);
-    const existing = map.get(key);
-    map.set(key, existing ? `${existing}, ${alias}` : alias);
-  }
-  return map;
+/** {@link uuidAliasMap} keyed by hmac(uuid), for joining against analytics. */
+export async function buildUuidHashAliasMap(): Promise<Map<string, string>> {
+  const byUuid = await uuidAliasMap();
+  return new Map(
+    [...byUuid].map(([uuid, alias]) => [hmac(uuid), alias] as const)
+  );
 }
 
 export interface AdminUserDetail extends AdminUserListItem {
@@ -96,7 +74,7 @@ export const AdminUsersRepository = {
     );
 
     const cutoff = Date.now() - 86_400_000;
-    const aliasMap = buildUuidAliasMap();
+    const aliasMap = await uuidAliasMap();
     const items: AdminUserListItem[] = [];
     for (const r of rows) {
       const c = await db.query<{ c: number | string }>(
@@ -143,7 +121,7 @@ export const AdminUsersRepository = {
       updatedAt: toUtcString(r.updated_at),
       accessedAt: toUtcString(r.accessed_at),
       requests24h: Number(c[0]?.c ?? 0),
-      alias: buildUuidAliasMap().get(uuid),
+      alias: (await uuidAliasMap()).get(uuid),
       recentErrorStages: errs.map((e) => ({
         stage: e.error_stage,
         count: Number(e.c),

@@ -219,7 +219,7 @@ export const AnalyticsRepository = {
           WHERE ts >= ${since} AND uuid_hash IS NOT NULL
           GROUP BY uuid_hash ORDER BY c DESC LIMIT 20`
     );
-    const aliasMap = buildUuidHashAliasMap();
+    const aliasMap = await buildUuidHashAliasMap();
     return rows.map((r) => ({
       uuidHash: r.uuid_hash,
       requests: n(r.c),
